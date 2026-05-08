@@ -1,11 +1,11 @@
 /**
  * app/audit/page.tsx
- * Audit initiation page — placeholder for Day 2+ form.
+ * Audit page — full spend input experience.
  */
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, FileSearch } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { AuditForm } from "@/components/audit/audit-form";
 
 export const metadata: Metadata = {
   title: "Start Your AI Audit",
@@ -15,50 +15,29 @@ export const metadata: Metadata = {
 
 export default function AuditPage() {
   return (
-    <div className="container-page section flex flex-col items-center text-center">
+    <div className="container-page py-10 md:py-16">
       {/* Back link */}
       <Link
         href="/"
-        className="mb-10 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors self-start"
+        className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to home
       </Link>
 
-      {/* Icon */}
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand/10 ring-1 ring-brand/30 mb-6">
-        <FileSearch className="h-8 w-8 text-brand" />
+      {/* Page header */}
+      <div className="mb-10 max-w-2xl">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Audit your <span className="gradient-text">AI spend</span>
+        </h1>
+        <p className="mt-3 text-muted-foreground">
+          Select the AI tools your team uses, configure your plans and seats,
+          and we&apos;ll analyse where you can save.
+        </p>
       </div>
 
-      {/* Heading */}
-      <h1 className="max-w-xl text-balance">
-        Start your <span className="gradient-text">free audit</span>
-      </h1>
-      <p className="mt-4 max-w-lg text-muted-foreground text-balance">
-        We&apos;re putting the finishing touches on the audit form.
-        Check back soon!
-      </p>
-
-      {/* Placeholder CTA */}
-      <div className="mt-8 flex flex-col sm:flex-row gap-3">
-        <Button
-          size="lg"
-          disabled
-          className="bg-brand text-white opacity-60 cursor-not-allowed"
-        >
-          Audit form coming soon
-        </Button>
-        <Button
-          nativeButton={false}
-          size="lg"
-          variant="outline"
-          render={<Link href="/" />}
-        >
-          Back to home
-        </Button>
-      </div>
-
-
+      {/* Form */}
+      <AuditForm />
     </div>
   );
 }
