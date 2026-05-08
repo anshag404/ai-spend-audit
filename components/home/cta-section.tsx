@@ -20,7 +20,7 @@ export function CtaSection() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="relative overflow-hidden rounded-2xl border border-brand/20 bg-brand/5 px-8 py-16 text-center"
         >
           {/* Background glow */}

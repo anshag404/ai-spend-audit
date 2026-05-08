@@ -4,7 +4,7 @@
  * components/home/how-it-works-section.tsx
  * Three-step explainer section.
  */
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, Variants } from "framer-motion";
 import { useRef } from "react";
 import { ClipboardList, Cpu, TrendingDown } from "lucide-react";
 
@@ -32,19 +32,19 @@ const steps = [
   },
 ];
 
-const container = {
+const container: Variants = {
   hidden: {},
   visible: {
     transition: { staggerChildren: 0.15 },
   },
 };
 
-const item = {
+const item: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: "easeOut" },
   },
 };
 

@@ -264,9 +264,9 @@ export function AuditForm() {
               onToggle={handleToggleTool}
             />
 
-            {errors.tools && (
+            {typeof errors.tools === "string" && (
               <p className="mt-4 text-sm text-destructive" role="alert">
-                {errors.tools as string}
+                {errors.tools}
               </p>
             )}
 
