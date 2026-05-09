@@ -181,7 +181,7 @@ export function SharePanel({
                             </p>
                             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                               Enter your email to get a link to your full report
-                              — plus we'll send you a shareable version you can
+                              — plus we&apos;ll send you a shareable version you can
                               forward to your team.
                             </p>
                           </div>
@@ -257,7 +257,7 @@ export function SharePanel({
                           Report link ready!
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          We've emailed you the link. Here it is to share now:
+                          We&apos;ve emailed you the link. Here it is to share now:
                         </p>
                       </div>
 

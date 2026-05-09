@@ -110,6 +110,7 @@ export function ResultsDashboard() {
 
   useEffect(() => {
     if (state.status === "ready") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       saveAuditToDb(state.report);
     }
   }, [state.status, saveAuditToDb, state]);

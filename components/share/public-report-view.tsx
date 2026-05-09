@@ -129,7 +129,7 @@ export function PublicReportView({
           <div className="mb-8">
             <p className="text-sm text-emerald-400 mb-2">🎉 Well-optimised stack</p>
             <p className="text-3xl font-bold tracking-tight text-foreground">
-              This team's AI spend is lean
+              This team&apos;s AI spend is lean
             </p>
           </div>
         )}
