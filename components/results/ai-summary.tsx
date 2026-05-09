@@ -97,6 +97,7 @@ export function AiSummary({ report }: AiSummaryProps) {
   }, [report]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSummary();
   }, [fetchSummary]);
 
