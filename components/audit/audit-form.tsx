@@ -154,9 +154,15 @@ export function AuditForm() {
     }
 
     setIsSubmitting(true);
-    // TODO: Day 3+ — send to Supabase / API
-    // For now, navigate to results with data in localStorage
-    await new Promise((r) => setTimeout(r, 1500)); // Simulate API call
+
+    // Run the deterministic audit engine
+    const { runAudit } = await import("@/lib/engine");
+    const report = runAudit(formData);
+
+    // Persist report to localStorage for the results page
+    window.localStorage.setItem("audit-report", JSON.stringify(report));
+
+    // Navigate to results
     window.location.href = "/results";
   }, [formData]);
 
