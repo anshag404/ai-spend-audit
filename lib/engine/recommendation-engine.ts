@@ -10,7 +10,7 @@
  * Runs entirely in the browser (client-side).
  */
 import type { AuditFormData } from "@/types/audit";
-import type { AuditReport, Recommendation, ToolAnalysis } from "./audit-types";
+import type { AuditReport, Recommendation } from "./audit-types";
 import {
   effectiveMonthly,
   buildSpendBreakdown,

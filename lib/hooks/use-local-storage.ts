@@ -19,6 +19,7 @@ export function useLocalStorage<T>(
     try {
       const item = window.localStorage.getItem(key);
       if (item !== null) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setStored(JSON.parse(item));
       }
     } catch (error) {

@@ -52,10 +52,8 @@ export function ToolEntryCard({
   onRemove,
 }: ToolEntryCardProps) {
   const tool = getToolById(entry.toolId);
-  if (!tool) return null;
 
-  const Icon = ICON_MAP[tool.iconName] ?? Cpu;
-  const selectedPlan = tool.plans.find((p) => p.id === entry.planId);
+  const selectedPlan = tool?.plans.find((p) => p.id === entry.planId);
   const isUsageBased = selectedPlan?.usageBased ?? false;
 
   // Calculate the expected monthly cost based on plan + seats
@@ -72,6 +70,7 @@ export function ToolEntryCard({
   const handlePlanChange = useCallback(
     (planId: string) => {
       onChange(index, "planId", planId);
+      if (!tool) return;
       const plan = tool.plans.find((p) => p.id === planId);
       if (plan && !plan.usageBased) {
         const price =
@@ -81,7 +80,7 @@ export function ToolEntryCard({
         onChange(index, "monthlySpend", Math.round(price * entry.seats * 100) / 100);
       }
     },
-    [onChange, index, tool.plans, entry.billingCycle, entry.seats]
+    [onChange, index, tool, entry.billingCycle, entry.seats]
   );
 
   const handleCycleChange = useCallback(
@@ -111,6 +110,10 @@ export function ToolEntryCard({
     },
     [onChange, index, selectedPlan, entry.billingCycle]
   );
+
+  if (!tool) return null;
+
+  const Icon = ICON_MAP[tool.iconName] ?? Cpu;
 
   return (
     <motion.div

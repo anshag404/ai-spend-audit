@@ -27,7 +27,7 @@ import { ToolSelector } from "@/components/audit/tool-selector";
 import { ToolEntryCard } from "@/components/audit/tool-entry-card";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { auditFormSchema } from "@/lib/schemas/audit-schema";
-import { getToolById, AI_TOOLS } from "@/config/pricing";
+import { getToolById } from "@/config/pricing";
 import { formatCurrency } from "@/lib/utils";
 import type { AuditFormData, AuditFormStep, AuditToolEntry } from "@/types/audit";
 

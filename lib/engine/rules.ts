@@ -10,7 +10,7 @@
  * IMPORTANT: No AI. No LLMs. No external APIs. Every recommendation is
  * traceable to a specific financial rule with clear math.
  */
-import type { AuditToolEntry, AuditFormData } from "@/types/audit";
+import type { AuditToolEntry } from "@/types/audit";
 import type { Recommendation, Confidence } from "./audit-types";
 import { effectiveMonthly, costOnPlan, annualSwitchSavings, round2 } from "./calculator";
 import { getToolById, AI_TOOLS } from "@/config/pricing";
