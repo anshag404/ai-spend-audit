@@ -33,8 +33,8 @@ export function CtaSection() {
               Ready to reclaim your AI budget?
             </h2>
             <p className="mt-4 max-w-md mx-auto text-muted-foreground text-balance">
-              Join 200+ startups that have already audited their AI stack and
-              found an average of $3,400 in annual savings.
+              Free. No login required. Takes 60 seconds. The average audit
+              uncovers $3,400 in annual savings.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Button

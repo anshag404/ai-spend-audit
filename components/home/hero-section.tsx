@@ -62,8 +62,8 @@ export function HeroSection() {
           custom={0.2}
           className="mt-6 max-w-2xl text-lg text-muted-foreground text-balance"
         >
-          Paste your subscriptions, and we surface redundant tools, usage gaps,
-          and concrete savings — in under 60 seconds. No integrations needed.
+          Select your team's AI subscriptions, and we surface redundant tools,
+          usage gaps, and concrete savings — in under 60 seconds.
         </motion.p>
 
         <motion.div
@@ -99,9 +99,9 @@ export function HeroSection() {
           custom={0.4}
           className="mt-6 text-xs text-muted-foreground"
         >
-          Trusted by{" "}
-          <span className="font-semibold text-foreground">200+</span> early-stage
-          startups · Average savings{" "}
+          Built for{" "}
+          <span className="font-semibold text-foreground">early-stage startups</span>{" "}
+          · No login required · Average savings{" "}
           <span className="font-semibold text-foreground">$3,400/yr</span>
         </motion.p>
 

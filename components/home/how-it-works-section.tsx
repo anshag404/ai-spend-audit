@@ -12,16 +12,16 @@ const steps = [
   {
     icon: ClipboardList,
     step: "01",
-    title: "List your AI tools",
+    title: "Select your AI tools",
     description:
-      "Paste in your team's AI and SaaS subscriptions — names, prices, team usage. Takes about two minutes.",
+      "Pick the AI tools your team uses from our catalog, set plan tiers, seat counts, and billing cycles. Takes about two minutes.",
   },
   {
     icon: Cpu,
     step: "02",
     title: "We analyse overlaps",
     description:
-      "Our engine maps your stack against 500+ known AI tools, detects capability overlaps, and flags underutilised seats.",
+      "Our engine compares your stack against our AI pricing database, detects capability overlaps, and flags underutilised seats.",
   },
   {
     icon: TrendingDown,
