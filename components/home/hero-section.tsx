@@ -62,7 +62,7 @@ export function HeroSection() {
           custom={0.2}
           className="mt-6 max-w-2xl text-lg text-muted-foreground text-balance"
         >
-          Select your team's AI subscriptions, and we surface redundant tools,
+          Select your team&apos;s AI subscriptions, and we surface redundant tools,
           usage gaps, and concrete savings — in under 60 seconds.
         </motion.p>
 
