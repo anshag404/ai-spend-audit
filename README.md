@@ -1,6 +1,8 @@
 # AI Spend Audit
 
 > Stop overpaying for AI tools your team barely uses.
+>
+> [**Live Demo →**](https://ai-spend-audit-seven-lime.vercel.app/)
 
 [![CI](https://github.com/anshag404/ai-spend-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/anshag404/ai-spend-audit/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)

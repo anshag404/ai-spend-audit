@@ -10,7 +10,7 @@ export const siteConfig: SiteConfig = {
   description:
     "Instantly analyse your team's AI tool subscriptions, detect redundant tools, and surface actionable savings. Built for lean startups.",
   url:
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://aispendaudit.com",
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://ai-spend-audit-seven-lime.vercel.app",
   ogImage: "/og-image.png",
   links: {
     github: "https://github.com/anshag404/ai-spend-audit",
