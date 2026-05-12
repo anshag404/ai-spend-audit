@@ -54,10 +54,8 @@ export function ResultsDashboard() {
         return;
       }
       const report = JSON.parse(raw) as AuditReport;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({ status: "ready", report });
     } catch {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({ status: "empty" });
     }
   }, []);
