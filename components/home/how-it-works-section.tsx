@@ -68,7 +68,7 @@ export function HowItWorksSection() {
             From spreadsheet to savings in 60 seconds
           </h2>
           <p className="mt-4 text-muted-foreground">
-            No integrations. No OAuth dances. Just paste, analyse, save.
+            No integrations. No OAuth. Just select, analyse, save.
           </p>
         </div>
 

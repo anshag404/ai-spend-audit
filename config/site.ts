@@ -13,14 +13,15 @@ export const siteConfig: SiteConfig = {
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://aispendaudit.com",
   ogImage: "/og-image.png",
   links: {
-    github: "https://github.com/your-org/ai-spend-audit",
+    github: "https://github.com/anshag404/ai-spend-audit",
     twitter: "https://twitter.com/aispendaudit",
   },
 };
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
 export const navItems = [
-  { label: "How it works", href: "/#how-it-works" },
-  { label: "Pricing", href: "/#pricing" },
-  { label: "Blog", href: "/blog" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "Supported Tools", href: "/#supported-tools" },
+  { label: "Why Trust Us", href: "/#trust" },
+  { label: "Sample Audit", href: "/#sample-audit" },
 ] as const;

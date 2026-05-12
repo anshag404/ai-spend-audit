@@ -5,12 +5,15 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/home/hero-section";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
+import { SupportedToolsSection } from "@/components/home/supported-tools-section";
+import { SampleAuditSection } from "@/components/home/sample-audit-section";
+import { TrustSection } from "@/components/home/trust-section";
 import { CtaSection } from "@/components/home/cta-section";
 
 export const metadata: Metadata = {
-  title: "AI Spend Audit — Stop Overpaying for AI",
+  title: "AI Spend Audit — Stop Overpaying for AI Tools",
   description:
-    "Instantly analyse your team's AI tool subscriptions, detect redundant tools, and surface actionable savings in under 60 seconds.",
+    "Audit your startup's AI tool subscriptions in 60 seconds. Find redundant seats, wrong plan tiers, and overspending — free, no login required.",
 };
 
 export default function HomePage() {
@@ -18,6 +21,9 @@ export default function HomePage() {
     <>
       <HeroSection />
       <HowItWorksSection />
+      <SupportedToolsSection />
+      <SampleAuditSection />
+      <TrustSection />
       <CtaSection />
     </>
   );
