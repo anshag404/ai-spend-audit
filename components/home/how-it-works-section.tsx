@@ -73,14 +73,15 @@ export function HowItWorksSection() {
         </div>
 
         {/* Steps */}
-        <motion.div
+        <motion.ol
           variants={container}
           initial="hidden"
           animate={inView ? "visible" : "hidden"}
           className="grid md:grid-cols-3 gap-8"
+          aria-label="Three steps to get your AI savings report"
         >
           {steps.map(({ icon: Icon, step, title, description }) => (
-            <motion.div key={step} variants={item}>
+            <motion.li key={step} variants={item} className="list-none">
               <div className="relative rounded-xl border border-border/50 bg-card/40 p-6 h-full hover:border-brand/30 transition-colors group">
                 {/* Step number */}
                 <span className="absolute -top-3 left-6 text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-brand/10 text-brand border border-brand/20">
@@ -97,9 +98,9 @@ export function HowItWorksSection() {
                   {description}
                 </p>
               </div>
-            </motion.div>
+            </motion.li>
           ))}
-        </motion.div>
+        </motion.ol>
       </div>
     </section>
   );

@@ -3,14 +3,10 @@
 /**
  * components/audit/audit-form.tsx
  * Main audit form orchestrator.
- *
- * Architecture: instead of react-hook-form for the whole nested form
- * (which fights with dynamic array fields and custom pill selectors),
- * we manage state manually and validate with zod on submit.
- * This gives us full control over the UX.
  */
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import posthog from "posthog-js";
 import {
   ArrowRight,
   ArrowLeft,
@@ -63,6 +59,19 @@ export function AuditForm() {
   const [step, setStep] = useState<AuditFormStep>("select-tools");
   const [errors, setErrors] = useState<Record<string, unknown>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const stepContainerRef = useRef<HTMLDivElement>(null);
+
+  // Track initial audit start
+  useEffect(() => {
+    posthog.capture("audit_started");
+  }, []);
+
+  // Focus management: move focus to top of step when navigating
+  useEffect(() => {
+    if (stepContainerRef.current) {
+      stepContainerRef.current.focus();
+    }
+  }, [step]);
 
   // ─── Derived state ──────────────────────────────────────────────────────
   const selectedToolIds = useMemo(
@@ -128,9 +137,11 @@ export function AuditForm() {
       }
       setErrors({});
       setStep("configure");
+      posthog.capture("audit_step_completed", { step: "select-tools" });
     } else if (step === "configure") {
       setErrors({});
       setStep("review");
+      posthog.capture("audit_step_completed", { step: "configure" });
     }
   }, [step, formData.tools.length]);
 
@@ -143,7 +154,6 @@ export function AuditForm() {
   const handleSubmit = useCallback(async () => {
     const result = auditFormSchema.safeParse(formData);
     if (!result.success) {
-      // Map zod errors to a flat object
       const fieldErrors: Record<string, string> = {};
       for (const issue of result.error.issues) {
         const path = issue.path.join(".");
@@ -155,16 +165,19 @@ export function AuditForm() {
 
     setIsSubmitting(true);
 
-    // Run the deterministic audit engine
     const { runAudit } = await import("@/lib/engine");
     const report = runAudit(formData);
 
-    // Persist report to localStorage for the results page
     window.localStorage.setItem("audit-report", JSON.stringify(report));
 
-    // Navigate to results
+    posthog.capture("audit_completed", {
+      toolCount: formData.tools.length,
+      teamSize: formData.teamSize,
+      totalMonthlySpend,
+    });
+    
     window.location.href = "/results";
-  }, [formData]);
+  }, [formData, totalMonthlySpend]);
 
   // ─── Reset ──────────────────────────────────────────────────────────────
   const handleReset = useCallback(() => {
@@ -177,8 +190,8 @@ export function AuditForm() {
   return (
     <div className="w-full">
       {/* Progress bar */}
-      <div className="mb-10">
-        <div className="flex items-center justify-between mb-3">
+      <nav className="mb-10" aria-label="Audit Progress">
+        <ol className="flex items-center justify-between mb-3">
           {(
             [
               { key: "select-tools", label: "Select Tools", num: 1 },
@@ -186,49 +199,44 @@ export function AuditForm() {
               { key: "review", label: "Review & Submit", num: 3 },
             ] as const
           ).map(({ key, label, num }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => {
-                // Allow navigating back to completed steps
-                const steps: AuditFormStep[] = [
-                  "select-tools",
-                  "configure",
-                  "review",
-                ];
-                const currentIdx = steps.indexOf(step);
-                const targetIdx = steps.indexOf(key);
-                if (targetIdx <= currentIdx) setStep(key);
-              }}
-              className="flex items-center gap-2 text-xs font-medium"
-            >
-              <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-colors ${
-                  step === key
-                    ? "bg-brand text-white"
-                    : (
+            <li key={key}>
+              <button
+                type="button"
+                onClick={() => {
+                  const steps: AuditFormStep[] = ["select-tools", "configure", "review"];
+                  const currentIdx = steps.indexOf(step);
+                  const targetIdx = steps.indexOf(key);
+                  if (targetIdx <= currentIdx) setStep(key);
+                }}
+                aria-current={step === key ? "step" : undefined}
+                className="flex items-center gap-2 text-xs font-medium"
+              >
+                <span
+                  className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-colors ${step === key
+                      ? "bg-brand text-white"
+                      : (
                         ["select-tools", "configure", "review"].indexOf(key) <
                         ["select-tools", "configure", "review"].indexOf(step)
                       )
-                      ? "bg-brand/20 text-brand"
-                      : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {num}
-              </span>
-              <span
-                className={`hidden sm:inline ${
-                  step === key
-                    ? "text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {label}
-              </span>
-            </button>
+                        ? "bg-brand/20 text-brand"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                >
+                  {num}
+                </span>
+                <span
+                  className={`hidden sm:inline ${step === key
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                    }`}
+                >
+                  {label}
+                </span>
+              </button>
+            </li>
           ))}
-        </div>
-        <div className="h-1 rounded-full bg-muted overflow-hidden">
+        </ol>
+        <div className="h-1 rounded-full bg-muted overflow-hidden" aria-hidden="true">
           <motion.div
             className="h-full bg-brand rounded-full"
             initial={false}
@@ -243,269 +251,276 @@ export function AuditForm() {
             transition={{ duration: 0.3, ease: "easeInOut" }}
           />
         </div>
-      </div>
+      </nav>
 
       {/* Step content */}
-      <AnimatePresence mode="wait">
-        {step === "select-tools" && (
-          <motion.div
-            key="select"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.25 }}
-          >
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-foreground">
-                Which AI tools does your team use?
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Select all the AI tools and services your team is currently
-                paying for. You&apos;ll configure details next.
-              </p>
-            </div>
-
-            <ToolSelector
-              selectedToolIds={selectedToolIds}
-              onToggle={handleToggleTool}
-            />
-
-            {typeof errors.tools === "string" && (
-              <p className="mt-4 text-sm text-destructive" role="alert">
-                {errors.tools}
-              </p>
-            )}
-
-            {/* Selected summary */}
-            {formData.tools.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-6 flex items-center gap-3 text-sm text-muted-foreground"
-              >
-                <span className="font-semibold text-foreground">
-                  {formData.tools.length}
-                </span>{" "}
-                tool{formData.tools.length !== 1 ? "s" : ""} selected
-              </motion.div>
-            )}
-          </motion.div>
-        )}
-
-        {step === "configure" && (
-          <motion.div
-            key="configure"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.25 }}
-          >
-            {/* Team info */}
-            <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-xl border border-border/50 bg-card/30">
-              <FormField
-                id="team-name"
-                label="Team / Company name"
-                required
-                error={errors.teamName as string}
-              >
-                <Input
-                  id="team-name"
-                  placeholder="Acme Corp"
-                  value={formData.teamName}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      teamName: e.target.value,
-                    }))
-                  }
-                  className="max-w-xs"
-                />
-              </FormField>
-
-              <FormField
-                id="team-size"
-                label="Team size"
-                required
-                description="How many people use AI tools on your team?"
-                error={errors.teamSize as string}
-              >
-                <Input
-                  id="team-size"
-                  type="number"
-                  min={1}
-                  max={100000}
-                  value={formData.teamSize}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      teamSize: parseInt(e.target.value) || 1,
-                    }))
-                  }
-                  className="max-w-[120px]"
-                />
-              </FormField>
-            </div>
-
-            {/* Per-tool configuration */}
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold text-foreground">
-                Configure your tools
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Set the plan, seats, and spend for each tool.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <AnimatePresence mode="popLayout">
-                {formData.tools.map((entry, index) => (
-                  <ToolEntryCard
-                    key={entry.toolId}
-                    entry={entry}
-                    index={index}
-                    errors={
-                      Object.fromEntries(
-                        Object.entries(errors)
-                          .filter(([k]) =>
-                            k.startsWith(`tools.${index}.`)
-                          )
-                          .map(([k, v]) => [
-                            k.replace(`tools.${index}.`, ""),
-                            v as string,
-                          ])
-                      )
-                    }
-                    onChange={handleEntryChange}
-                    onRemove={handleRemoveTool}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-
-            {/* Add more tools */}
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-4 gap-2"
-              onClick={() => setStep("select-tools")}
+      <div 
+        ref={stepContainerRef} 
+        tabIndex={-1} 
+        className="outline-none"
+        aria-live="polite"
+      >
+        <AnimatePresence mode="wait">
+          {step === "select-tools" && (
+            <motion.div
+              key="select"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.25 }}
             >
-              <Plus className="h-4 w-4" />
-              Add more tools
-            </Button>
-          </motion.div>
-        )}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-foreground">
+                  Which AI tools does your team use?
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Select all the AI tools and services your team is currently
+                  paying for. You&apos;ll configure details next.
+                </p>
+              </div>
 
-        {step === "review" && (
-          <motion.div
-            key="review"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.25 }}
-          >
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-foreground">
-                Review your audit
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Confirm your details and submit to get your savings report.
-              </p>
-            </div>
+              <ToolSelector
+                selectedToolIds={selectedToolIds}
+                onToggle={handleToggleTool}
+              />
 
-            {/* Summary cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="rounded-xl border border-border/50 bg-card/40 p-5">
-                <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="text-xs font-medium">Monthly spend</span>
+              {typeof errors.tools === "string" && (
+                <p className="mt-4 text-sm text-destructive" role="alert">
+                  {errors.tools}
+                </p>
+              )}
+
+              {/* Selected summary */}
+              {formData.tools.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 flex items-center gap-3 text-sm text-muted-foreground"
+                >
+                  <span className="font-semibold text-foreground">
+                    {formData.tools.length}
+                  </span>{" "}
+                  tool{formData.tools.length !== 1 ? "s" : ""} selected
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+
+          {step === "configure" && (
+            <motion.div
+              key="configure"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.25 }}
+            >
+              {/* Team info */}
+              <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-xl border border-border/50 bg-card/30">
+                <FormField
+                  id="team-name"
+                  label="Team / Company name"
+                  required
+                  error={errors.teamName as string}
+                >
+                  <Input
+                    id="team-name"
+                    placeholder="Acme Corp"
+                    value={formData.teamName}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        teamName: e.target.value,
+                      }))
+                    }
+                    className="max-w-xs"
+                  />
+                </FormField>
+
+                <FormField
+                  id="team-size"
+                  label="Team size"
+                  required
+                  description="How many people use AI tools on your team?"
+                  error={errors.teamSize as string}
+                >
+                  <Input
+                    id="team-size"
+                    type="number"
+                    min={1}
+                    max={100000}
+                    value={formData.teamSize}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        teamSize: parseInt(e.target.value) || 1,
+                      }))
+                    }
+                    className="max-w-[120px]"
+                  />
+                </FormField>
+              </div>
+
+              {/* Per-tool configuration */}
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-foreground">
+                  Configure your tools
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Set the plan, seats, and spend for each tool.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <AnimatePresence mode="popLayout">
+                  {formData.tools.map((entry, index) => (
+                    <ToolEntryCard
+                      key={entry.toolId}
+                      entry={entry}
+                      index={index}
+                      errors={
+                        Object.fromEntries(
+                          Object.entries(errors)
+                            .filter(([k]) =>
+                              k.startsWith(`tools.${index}.`)
+                            )
+                            .map(([k, v]) => [
+                              k.replace(`tools.${index}.`, ""),
+                              v as string,
+                            ])
+                        )
+                      }
+                      onChange={handleEntryChange}
+                      onRemove={handleRemoveTool}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              {/* Add more tools */}
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-4 gap-2"
+                onClick={() => setStep("select-tools")}
+              >
+                <Plus className="h-4 w-4" />
+                Add more tools
+              </Button>
+            </motion.div>
+          )}
+
+          {step === "review" && (
+            <motion.div
+              key="review"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-foreground">
+                  Review your audit
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Confirm your details and submit to get your savings report.
+                </p>
+              </div>
+
+              {/* Summary cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div className="rounded-xl border border-border/50 bg-card/40 p-5">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <DollarSign className="h-4 w-4" />
+                    <span className="text-xs font-medium">Monthly spend</span>
+                  </div>
+                  <p className="text-2xl font-bold tracking-tight text-foreground">
+                    {formatCurrency(totalMonthlySpend)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formatCurrency(totalMonthlySpend * 12)}/year
+                  </p>
                 </div>
-                <p className="text-2xl font-bold tracking-tight text-foreground">
-                  {formatCurrency(totalMonthlySpend)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {formatCurrency(totalMonthlySpend * 12)}/year
-                </p>
-              </div>
 
-              <div className="rounded-xl border border-border/50 bg-card/40 p-5">
-                <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                  <Users className="h-4 w-4" />
-                  <span className="text-xs font-medium">Total seats</span>
+                <div className="rounded-xl border border-border/50 bg-card/40 p-5">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <Users className="h-4 w-4" />
+                    <span className="text-xs font-medium">Total seats</span>
+                  </div>
+                  <p className="text-2xl font-bold tracking-tight text-foreground">
+                    {totalSeats}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    across {formData.tools.length} tool
+                    {formData.tools.length !== 1 ? "s" : ""}
+                  </p>
                 </div>
-                <p className="text-2xl font-bold tracking-tight text-foreground">
-                  {totalSeats}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  across {formData.tools.length} tool
-                  {formData.tools.length !== 1 ? "s" : ""}
-                </p>
-              </div>
 
-              <div className="rounded-xl border border-border/50 bg-card/40 p-5">
-                <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                  <Wrench className="h-4 w-4" />
-                  <span className="text-xs font-medium">Team</span>
+                <div className="rounded-xl border border-border/50 bg-card/40 p-5">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <Wrench className="h-4 w-4" />
+                    <span className="text-xs font-medium">Team</span>
+                  </div>
+                  <p className="text-2xl font-bold tracking-tight text-foreground">
+                    {formData.teamName || "—"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formData.teamSize} member{formData.teamSize !== 1 ? "s" : ""}
+                  </p>
                 </div>
-                <p className="text-2xl font-bold tracking-tight text-foreground">
-                  {formData.teamName || "—"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {formData.teamSize} member{formData.teamSize !== 1 ? "s" : ""}
-                </p>
               </div>
-            </div>
 
-            {/* Tool list */}
-            <div className="rounded-xl border border-border/50 overflow-hidden mb-8">
-              <div className="px-5 py-3 border-b border-border/40 bg-muted/20">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Tool breakdown
-                </p>
-              </div>
-              {formData.tools.map((entry) => {
-                const tool = getToolById(entry.toolId);
-                const plan = tool?.plans.find((p) => p.id === entry.planId);
-                return (
-                  <div
-                    key={entry.toolId}
-                    className="flex items-center justify-between px-5 py-3 border-b border-border/30 last:border-b-0"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {tool?.name ?? entry.toolId}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {plan?.name ?? "—"} · {entry.seats} seat
-                        {entry.seats !== 1 ? "s" : ""} · {entry.billingCycle}
+              {/* Tool list */}
+              <div className="rounded-xl border border-border/50 overflow-hidden mb-8">
+                <div className="px-5 py-3 border-b border-border/40 bg-muted/20">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Tool breakdown
+                  </p>
+                </div>
+                {formData.tools.map((entry) => {
+                  const tool = getToolById(entry.toolId);
+                  const plan = tool?.plans.find((p) => p.id === entry.planId);
+                  return (
+                    <div
+                      key={entry.toolId}
+                      className="flex items-center justify-between px-5 py-3 border-b border-border/30 last:border-b-0"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {tool?.name ?? entry.toolId}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {plan?.name ?? "—"} · {entry.seats} seat
+                          {entry.seats !== 1 ? "s" : ""} · {entry.billingCycle}
+                        </p>
+                      </div>
+                      <p className="text-sm font-semibold text-foreground">
+                        {formatCurrency(entry.monthlySpend)}
+                        <span className="text-xs font-normal text-muted-foreground">
+                          /mo
+                        </span>
                       </p>
                     </div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {formatCurrency(entry.monthlySpend)}
-                      <span className="text-xs font-normal text-muted-foreground">
-                        /mo
-                      </span>
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Validation errors */}
-            {Object.keys(errors).length > 0 && (
-              <div className="mb-6 p-4 rounded-lg border border-destructive/30 bg-destructive/5">
-                <p className="text-sm font-medium text-destructive mb-2">
-                  Please fix the following:
-                </p>
-                <ul className="list-disc list-inside text-xs text-destructive space-y-1">
-                  {Object.entries(errors).map(([key, msg]) => (
-                    <li key={key}>{msg as string}</li>
-                  ))}
-                </ul>
+                  );
+                })}
               </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+              {/* Validation errors */}
+              {Object.keys(errors).length > 0 && (
+                <div className="mb-6 p-4 rounded-lg border border-destructive/30 bg-destructive/5">
+                  <p className="text-sm font-medium text-destructive mb-2">
+                    Please fix the following:
+                  </p>
+                  <ul className="list-disc list-inside text-xs text-destructive space-y-1">
+                    {Object.entries(errors).map(([key, msg]) => (
+                      <li key={key}>{msg as string}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Navigation buttons */}
       <div className="mt-10 flex items-center justify-between border-t border-border/40 pt-6">

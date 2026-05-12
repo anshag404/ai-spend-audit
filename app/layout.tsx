@@ -84,6 +84,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+import { PostHogProvider } from "@/components/providers/posthog-provider";
+
 // ─── Layout ──────────────────────────────────────────────────────────────────
 export default function RootLayout({
   children,
@@ -97,9 +99,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col antialiased">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <PostHogProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </PostHogProvider>
       </body>
     </html>
   );

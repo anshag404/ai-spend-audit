@@ -27,6 +27,7 @@ import { SpendChart } from "./spend-chart";
 import { ToolBreakdown } from "./tool-breakdown";
 import { AiSummary } from "./ai-summary";
 import { SharePanel } from "./share-panel";
+import { DashboardSkeleton } from "./dashboard-skeleton";
 
 type DashboardState =
   | { status: "loading" }
@@ -117,32 +118,7 @@ export function ResultsDashboard() {
 
   // ─── Loading state ──────────────────────────────────────────────────────
   if (state.status === "loading") {
-    return (
-      <div className="space-y-6">
-        {/* Hero skeleton */}
-        <div className="rounded-2xl border border-border/50 bg-card/40 p-8">
-          <div className="space-y-4">
-            <div className="h-4 w-32 rounded bg-muted/40 animate-shimmer" />
-            <div className="h-10 w-64 rounded bg-muted/40 animate-shimmer delay-100" />
-            <div className="h-4 w-48 rounded bg-muted/40 animate-shimmer delay-200" />
-          </div>
-          <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="h-20 rounded-xl border border-border/40 bg-card/40 animate-shimmer"
-                style={{ animationDelay: `${200 + i * 100}ms` }}
-              />
-            ))}
-          </div>
-        </div>
-        {/* Content skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64 rounded-xl border border-border/50 bg-card/40 animate-shimmer" />
-          <div className="h-64 rounded-xl border border-border/50 bg-card/40 animate-shimmer delay-200" />
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   // ─── Empty state ────────────────────────────────────────────────────────

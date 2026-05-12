@@ -71,7 +71,7 @@ export function RecommendationCard({
     .join(", ");
 
   return (
-    <motion.div
+    <motion.article
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 + index * 0.06, duration: 0.35 }}
@@ -81,6 +81,8 @@ export function RecommendationCard({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
+        aria-controls={`rec-detail-${rec.id}`}
         className="w-full text-left p-5 flex items-start gap-4"
       >
         {/* Savings badge */}
@@ -128,6 +130,7 @@ export function RecommendationCard({
       <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
+            id={`rec-detail-${rec.id}`}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -192,6 +195,6 @@ export function RecommendationCard({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </motion.article>
   );
 }
