@@ -125,10 +125,21 @@ function buildEmailHtml({
       Your spend health score is <strong style="color:#f8fafc;">${healthScore}/100</strong>.
     </p>
 
-    <!-- CTA -->
     <a href="${shareUrl}" style="display:inline-block;background:#6366f1;color:#fff;font-weight:700;font-size:15px;text-decoration:none;padding:14px 28px;border-radius:10px;letter-spacing:-0.01em;">
       View your full report →
     </a>
+
+    ${annualSavings > 500 ? `
+    <!-- Credex High-Savings Note -->
+    <div style="margin-top:32px;padding:20px;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.1);border-radius:12px;">
+      <p style="color:#f8fafc;font-size:14px;font-weight:700;margin:0 0 8px;">High Savings Opportunity Detected</p>
+      <p style="color:#94a3b8;font-size:13px;line-height:1.5;margin:0;">
+        Based on your identified savings of $${annualSavings.toLocaleString()}/yr, you qualify for a 
+        complimentary consultation with our partners at <strong>Credex</strong> to capture even 
+        deeper enterprise-level optimizations. A representative may reach out to you shortly.
+      </p>
+    </div>
+    ` : ""}
 
     <!-- Divider -->
     <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:40px 0;" />

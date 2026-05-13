@@ -17,6 +17,9 @@ export interface CaptureleadOptions {
   email: string;
   ipAddress: string | null;
   source?: string;
+  companyName?: string;
+  role?: string;
+  teamSize?: number;
 }
 
 export interface CaptureLeadResult {
@@ -30,6 +33,9 @@ export async function captureLead({
   email,
   ipAddress,
   source = "share-modal",
+  companyName,
+  role,
+  teamSize,
 }: CaptureleadOptions): Promise<CaptureLeadResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = getAdminClient() as any;
@@ -58,6 +64,9 @@ export async function captureLead({
       resend_message_id: null,
       source,
       ip_hash: ipHash,
+      company_name: companyName ?? null,
+      role: role ?? null,
+      team_size: teamSize ?? null,
     })
     .select()
     .single();

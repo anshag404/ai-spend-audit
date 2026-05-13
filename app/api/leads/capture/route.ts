@@ -85,6 +85,9 @@ export async function POST(request: NextRequest) {
       auditId,
       email,
       ipAddress: ip,
+      companyName: body.companyName,
+      role: body.role,
+      teamSize: body.teamSize,
       source: source ?? "share-modal",
     });
 

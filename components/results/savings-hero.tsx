@@ -52,7 +52,6 @@ export function SavingsHero({ report }: SavingsHeroProps) {
   const monthlySavings = useCountUp(report.summary.totalMonthlySavings);
   const healthScore = useCountUp(report.summary.healthScore);
 
-  const hasSavings = report.summary.totalAnnualSavings > 0;
 
   const metrics = [
     {
@@ -116,7 +115,58 @@ export function SavingsHero({ report }: SavingsHeroProps) {
             transition={{ delay: 0.25, duration: 0.5 }}
             className="mb-8"
           >
-            {hasSavings ? (
+            {report.summary.totalMonthlySavings > 500 ? (
+              <div className="space-y-4">
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  You could save up to
+                </p>
+                <div className="flex items-baseline gap-3 flex-wrap">
+                  <span className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight gradient-text">
+                    {formatCurrency(annualSavings)}
+                  </span>
+                  <span className="text-lg text-muted-foreground font-medium">
+                    per year
+                  </span>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
+                    <ArrowDown className="h-3 w-3" />
+                    {report.summary.savingsPercentage}% of total spend
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({formatCurrency(monthlySavings)}/mo)
+                  </span>
+                </div>
+                
+                {/* Credex Promo for High Savings */}
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-6 p-4 rounded-xl border border-brand/30 bg-brand/10 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand/20 text-brand shrink-0">
+                    <Zap className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-foreground">Unlock even deeper savings with Credex</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Our partners at Credex specialize in enterprise-grade AI cost recovery. 
+                      Based on your spend, you qualify for a free optimization consultation.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      const btn = document.getElementById('share-results-btn');
+                      btn?.click();
+                    }}
+                    className="px-4 py-2 bg-brand hover:bg-brand/90 text-white text-xs font-bold rounded-lg transition-colors shrink-0"
+                  >
+                    Claim Consultation
+                  </button>
+                </motion.div>
+              </div>
+            ) : report.summary.totalMonthlySavings > 100 ? (
               <>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
                   You could save up to
@@ -149,7 +199,8 @@ export function SavingsHero({ report }: SavingsHeroProps) {
                 </p>
                 <p className="mt-2 text-muted-foreground text-sm">
                   We couldn&apos;t find significant savings opportunities — your
-                  stack is lean.
+                  stack is lean. Still, let us notify you when new optimizations 
+                  apply to your stack.
                 </p>
               </>
             )}

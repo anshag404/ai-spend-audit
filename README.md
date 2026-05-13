@@ -1,8 +1,19 @@
 # AI Spend Audit
 
-> Stop overpaying for AI tools your team barely uses.
->
-> [**Live Demo →**](https://ai-spend-audit-seven-lime.vercel.app/)
+AI Spend Audit is a free, no-login web application that helps startups identify overspending in their AI tool stack. By analyzing subscriptions for tools like Cursor, ChatGPT, and OpenAI API, it provides a prioritized savings report with actionable recommendations in under 60 seconds.
+
+[**Live Demo →**](https://ai-spend-audit-seven-lime.vercel.app/)
+
+## Screenshots
+
+![Hero Section](https://via.placeholder.com/800x450?text=Hero+Section+Screenshot)
+*The landing page featuring a high-fidelity dashboard preview.*
+
+![Audit Form](https://via.placeholder.com/800x450?text=Audit+Form+Screenshot)
+*The multi-step audit form with tool selection and configuration.*
+
+![Results Dashboard](https://via.placeholder.com/800x450?text=Results+Dashboard+Screenshot)
+*The final savings report with prioritized recommendations and spend analysis.*
 
 [![CI](https://github.com/anshag404/ai-spend-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/anshag404/ai-spend-audit/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
@@ -178,18 +189,29 @@ npm test
 
 See [`.env.example`](./.env.example) for all required and optional variables.
 
+## Decisions
+
+1. **Client-Side Engine over Server-Side**: I chose to run the recommendation logic entirely in the browser using TypeScript math. This ensures zero latency for the user, absolute data privacy (spend data never leaves the browser unless shared), and zero server compute costs for the core product.
+2. **Deterministic Rules over LLM Logic**: Recommendations are produced by rule-based functions, not AI. This ensures 100% accuracy and defensibility of financial advice. AI is used only for cosmetic narrative summaries, keeping the core value proposition reliable.
+3. **localStorage for Persistence**: Form drafts are saved to `localStorage` instead of a database. This allows users to start, stop, and refresh the audit without needing to create an account, maximizing conversion while still providing a resilient experience.
+4. **Dark Mode Only**: I opted for a dark-mode-first aesthetic to save design and development time. Given the target audience (developers and startup founders), dark mode is the standard preference, allowing me to focus on high-quality gradients and typography.
+5. **PostHog for Analytics**: I integrated PostHog early to track the conversion funnel (Form Step 1 -> Results -> Lead Capture). This decision allows for data-driven decisions on where users drop off, which is critical for an MVP's growth.
+
 ## Docs
 
 | Document | Description |
 |----------|-------------|
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System architecture and design decisions |
-| [DEVLOG.md](./docs/DEVLOG.md) | Daily development log |
-| [TESTS.md](./docs/TESTS.md) | Testing strategy and coverage |
-| [PRICING_DATA.md](./docs/PRICING_DATA.md) | AI tool pricing data sources |
-| [GTM.md](./docs/GTM.md) | Go-to-market strategy |
-| [ECONOMICS.md](./docs/ECONOMICS.md) | Unit economics and funnel math |
-| [METRICS.md](./docs/METRICS.md) | Key metrics and KPIs |
-| [REFLECTION.md](./docs/REFLECTION.md) | Build retrospective |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | System architecture and design decisions |
+| [DEVLOG.md](./DEVLOG.md) | Daily development log |
+| [TESTS.md](./TESTS.md) | Testing strategy and coverage |
+| [PRICING_DATA.md](./PRICING_DATA.md) | AI tool pricing data sources |
+| [GTM.md](./GTM.md) | Go-to-market strategy |
+| [ECONOMICS.md](./ECONOMICS.md) | Unit economics and funnel math |
+| [METRICS.md](./METRICS.md) | Key metrics and KPIs |
+| [REFLECTION.md](./REFLECTION.md) | Build retrospective |
+| [USER_INTERVIEWS.md](./USER_INTERVIEWS.md) | User interview notes |
+| [LANDING_COPY.md](./LANDING_COPY.md) | Landing page copywriting |
+| [PROMPTS.md](./PROMPTS.md) | AI prompt engineering |
 
 ## License
 

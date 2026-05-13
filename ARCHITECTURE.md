@@ -195,10 +195,28 @@ Row Level Security is enabled. All reads are public (for shareable links). Write
 4. **No unnecessary client JS** — Landing page sections are Server Components by default.
 5. **Font optimisation** — Inter loaded via `next/font` with `display: swap`.
 
-## Security
+## Scaling to 10,000 Audits/Day
 
-- API keys are never exposed to the client (Gemini, Resend, Supabase service role).
-- IP addresses are hashed with a random salt before storage.
-- Rate limiting prevents abuse of save/summary endpoints.
-- Supabase Row Level Security protects database writes.
-- `.env.local` is gitignored. `.env.example` documents all required variables.
+If the application were to scale to 10,000 audits per day, the following architectural shifts would be required:
+
+### 1. Server-Side Recommendation Engine
+Currently, the engine runs in the browser. While this is fast, it limits our ability to run complex cross-user benchmarks or keep pricing data secret.
+- **Change**: Move `runAudit()` to an Edge Function (Next.js Middleware or Vercel Edge).
+- **Why**: Allows for faster updates to pricing data without redeploying the frontend and enables server-side caching of results.
+
+### 2. Global Pricing Cache (Redis)
+Instead of bundling the pricing catalog in the JS bundle, we would move it to a high-performance global cache.
+- **Change**: Implement Upstash Redis for tool pricing lookups.
+- **Why**: Reduces the initial JS bundle size and allows for near-instant pricing updates across all global regions.
+
+### 3. Asynchronous AI Processing
+Generating Gemini summaries synchronously would hit rate limits and slow down the user experience at scale.
+- **Change**: Move AI summary generation to a background job using a queue (e.g., Inngest or Upstash QStash).
+- **Why**: Decouples the dashboard load from the AI API latency and allows for automatic retries on rate-limit failures.
+
+### 4. Database Optimization
+Supabase is robust, but 10k writes/day to the `audits` table would benefit from a more optimized write-ahead strategy.
+- **Change**: Implement a buffer or use a time-series optimized storage for audit logs if we move beyond just "sharing" to "tracking spend over time."
+
+### 5. Multi-Region Deployment
+To maintain <100ms latency globally, we would deploy the frontend and Edge functions across all Vercel regions, with a distributed database or read-replicas.

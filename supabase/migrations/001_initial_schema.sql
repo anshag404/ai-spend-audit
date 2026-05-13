@@ -82,6 +82,11 @@ CREATE TABLE IF NOT EXISTS leads (
   source              TEXT NOT NULL DEFAULT 'share-modal',
   ip_hash             TEXT,
 
+  -- Optional organizational context (Day 7 assignment requirement)
+  company_name        TEXT,
+  role                TEXT,
+  team_size           SMALLINT,
+
   -- Prevent duplicate captures for same email + audit
   UNIQUE (audit_id, email)
 );

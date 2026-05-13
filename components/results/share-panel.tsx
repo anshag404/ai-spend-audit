@@ -45,6 +45,9 @@ export function SharePanel({
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<ModalStep>("email");
   const [email, setEmail] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [role, setRole] = useState("");
+  const [teamSize, setTeamSize] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -69,6 +72,9 @@ export function SharePanel({
         body: JSON.stringify({
           auditId,
           email,
+          companyName,
+          role,
+          teamSize: teamSize ? parseInt(teamSize) : undefined,
           source: "share-modal",
         }),
       });
@@ -206,6 +212,63 @@ export function SharePanel({
                             placeholder="you@company.com"
                             className="w-full rounded-lg border border-border/50 bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50 transition-colors"
                           />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label
+                              htmlFor="share-company-input"
+                              className="block text-[10px] font-medium text-muted-foreground mb-1"
+                            >
+                              Company (optional)
+                            </label>
+                            <input
+                              id="share-company-input"
+                              type="text"
+                              value={companyName}
+                              onChange={(e) => setCompanyName(e.target.value)}
+                              placeholder="Acme Inc"
+                              className="w-full rounded-lg border border-border/50 bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="share-role-input"
+                              className="block text-[10px] font-medium text-muted-foreground mb-1"
+                            >
+                              Role (optional)
+                            </label>
+                            <input
+                              id="share-role-input"
+                              type="text"
+                              value={role}
+                              onChange={(e) => setRole(e.target.value)}
+                              placeholder="CTO / VP Eng"
+                              className="w-full rounded-lg border border-border/50 bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="share-teamsize-input"
+                            className="block text-[10px] font-medium text-muted-foreground mb-1"
+                          >
+                            Team Size (optional)
+                          </label>
+                          <select
+                            id="share-teamsize-input"
+                            value={teamSize}
+                            onChange={(e) => setTeamSize(e.target.value)}
+                            className="w-full rounded-lg border border-border/50 bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
+                          >
+                            <option value="">Select range...</option>
+                            <option value="1">Solo</option>
+                            <option value="10">2-10</option>
+                            <option value="50">11-50</option>
+                            <option value="200">51-200</option>
+                            <option value="500">201+</option>
+                          </select>
                         </div>
 
                         {error && (

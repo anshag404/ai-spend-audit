@@ -83,6 +83,12 @@ export interface Database {
           created_at: string;
           /** Lead's email address (the only PII we store) */
           email: string;
+          /** Optional company name */
+          company_name: string | null;
+          /** Optional job title/role */
+          role: string | null;
+          /** Optional team size range */
+          team_size: number | null;
           /** Email delivery status from Resend */
           email_status: "pending" | "sent" | "failed";
           /** Resend message ID for delivery tracking */
